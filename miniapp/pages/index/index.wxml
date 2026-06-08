@@ -1,0 +1,123 @@
+<view class="page">
+  <view class="hero card">
+    <view class="hero-title">把照片快速变成一张能真正照着做的拼豆图稿</view>
+    <view class="hero-desc">你可以先用通用生成快速出稿，也可以切到礼物推荐，做更适合送人的纪念作品。</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">选择生成方式</view>
+    <view class="entry-type-row">
+      <block wx:for="{{entryTypes}}" wx:key="key">
+        <view
+          class="entry-type-pill {{item.active ? 'active' : ''}}"
+          bindtap="chooseEntryType"
+          data-entry-type="{{item.key}}"
+        >
+          <view class="entry-type-name">{{item.label}}</view>
+          <view class="entry-type-hint">{{item.hint}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">{{modeSectionTitle}}</view>
+    <view class="mode-row">
+      <block wx:for="{{modes}}" wx:key="key">
+        <view class="mode-pill {{item.active ? 'active' : ''}}" bindtap="chooseMode" data-mode="{{item.key}}">
+          <view class="mode-name">{{item.label}}</view>
+          <view class="mode-hint">{{item.hint}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">上传照片</view>
+    <view wx:if="{{!hasImage}}" class="upload-box" bindtap="pickImage">
+      <view class="upload-icon">+</view>
+      <view class="upload-title">选择一张照片</view>
+      <view class="upload-desc">建议使用头像、宠物正脸或对比清晰的纪念照</view>
+    </view>
+    <view wx:else class="preview-box">
+      <image class="origin-preview" src="{{imagePath}}" mode="aspectFill"></image>
+      <view class="preview-actions">
+        <button class="light-btn" bindtap="pickImage">重新选择</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">{{parameterSectionTitle}}</view>
+    <view class="field">
+      <view class="field-label">图稿尺寸</view>
+      <picker mode="selector" range="{{sizeOptions}}" range-key="label" bindchange="changeSize">
+        <view class="picker-value">{{sizeOptions[sizeIndex].label}}</view>
+      </picker>
+      <input
+        wx:if="{{showCustomSizeInput}}"
+        class="custom-input"
+        type="number"
+        value="{{customSize}}"
+        bindinput="handleCustomSizeInput"
+        placeholder="请输入 24~96 之间的整数"
+      />
+    </view>
+    <view class="field">
+      <view class="field-label">颜色数量</view>
+      <picker mode="selector" range="{{colorOptions}}" range-key="label" bindchange="changeColorCount">
+        <view class="picker-value">{{colorOptions[colorIndex].label}}</view>
+      </picker>
+      <input
+        wx:if="{{showCustomColorInput}}"
+        class="custom-input"
+        type="number"
+        value="{{customColorCount}}"
+        bindinput="handleCustomColorInput"
+        placeholder="请输入 6~48 之间的整数"
+      />
+    </view>
+    <view class="field-tip">{{fieldTip}}</view>
+  </view>
+
+  <button class="primary-btn" bindtap="generate" loading="{{loading}}" disabled="{{loading || !canGenerate}}">
+    <block wx:if="{{loading}}">{{loadingText}}</block>
+    <block wx:else>{{generateButtonLabel}}</block>
+  </button>
+
+  <view wx:if="{{result}}" class="result">
+    <view class="card">
+      <view class="section-title">生成结果</view>
+      <image class="result-preview" src="{{result.display_preview_url}}" mode="widthFix"></image>
+      <view class="result-meta">
+        <view class="meta-item">模式：{{result.display_mode_label}}</view>
+        <view class="meta-item">尺寸：{{result.display_size_text}}</view>
+        <view class="meta-item">预计豆子：{{result.total_beads}}</view>
+      </view>
+      <view class="gift-copy">{{result.gift_copy}}</view>
+      <view class="result-actions">
+        <button class="light-btn result-action-btn" bindtap="savePreview">保存图稿到相册</button>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">颜色清单</view>
+      <block wx:for="{{result.color_stats}}" wx:key="code">
+        <view class="color-row">
+          <view class="color-chip" style="background: rgb({{item.rgb[0]}}, {{item.rgb[1]}}, {{item.rgb[2]}});"></view>
+          <view class="color-info">
+            <view class="color-code">{{item.code}} · {{item.name}}</view>
+            <view class="color-count">{{item.count}} 颗</view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view class="card">
+      <view class="section-title">制作建议</view>
+      <block wx:for="{{result.craft_tips}}" wx:key="*this">
+        <view class="tip-row">• {{item}}</view>
+      </block>
+    </view>
+  </view>
+</view>

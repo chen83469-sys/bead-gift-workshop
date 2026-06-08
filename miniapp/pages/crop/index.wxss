@@ -1,0 +1,89 @@
+.crop-page {
+  min-height: 100vh;
+  background: #fff8f6;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.crop-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-shadow: 0 10rpx 30rpx rgba(85, 49, 49, 0.06);
+}
+
+.crop-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #3d2727;
+}
+
+.crop-desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #816767;
+}
+
+.crop-stage {
+  position: relative;
+  margin: 28rpx auto 0;
+  overflow: hidden;
+  border-radius: 24rpx;
+  background: #f6ecea;
+}
+
+.crop-image {
+  position: absolute;
+}
+
+.crop-frame {
+  position: absolute;
+  inset: 0;
+  border: 4rpx solid rgba(255, 255, 255, 0.95);
+  border-radius: 24rpx;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 0 9999rpx rgba(61, 39, 39, 0.12);
+  pointer-events: none;
+}
+
+.slider-wrap {
+  margin-top: 24rpx;
+}
+
+.slider-label {
+  font-size: 26rpx;
+  color: #5b4343;
+  margin-bottom: 6rpx;
+}
+
+.crop-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 24rpx;
+}
+
+.secondary-btn,
+.primary-btn {
+  flex: 1;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+}
+
+.secondary-btn {
+  background: #fff1f0;
+  color: #cc5b58;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #ff7d6e 0%, #ff9272 100%);
+  color: #fff;
+}
+
+.hidden-canvas {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}

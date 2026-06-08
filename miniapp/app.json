@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/crop/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "拼豆礼物工坊",
+    "navigationBarBackgroundColor": "#fff8f6",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fff8f6",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

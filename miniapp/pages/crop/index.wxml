@@ -1,0 +1,50 @@
+<view class="crop-page">
+  <view class="crop-card">
+    <view class="crop-title">调整想保留的画面</view>
+    <view class="crop-desc">拖动图片位置，配合下方缩放，让主体刚好落在裁剪框里。</view>
+
+    <view
+      class="crop-stage"
+      style="width: {{cropSize}}px; height: {{cropSize}}px;"
+      bindtouchstart="handleTouchStart"
+      bindtouchmove="handleTouchMove"
+      bindtouchend="handleTouchEnd"
+    >
+      <image
+        wx:if="{{imageLoaded}}"
+        class="crop-image"
+        src="{{sourcePath}}"
+        mode="aspectFill"
+        style="width: {{displayWidth}}px; height: {{displayHeight}}px; left: {{imageLeft}}px; top: {{imageTop}}px;"
+      />
+      <view class="crop-frame"></view>
+    </view>
+
+    <view class="slider-wrap">
+      <view class="slider-label">缩放图片</view>
+      <slider
+        min="{{minScaleStep}}"
+        max="{{maxScaleStep}}"
+        step="1"
+        value="{{scaleStep}}"
+        bindchanging="handleScaleChange"
+        bindchange="handleScaleChange"
+        activeColor="#ff8a73"
+        block-color="#ff8a73"
+      />
+    </view>
+  </view>
+
+<view class="crop-actions">
+    <button class="secondary-btn" bindtap="handleCancel">取消</button>
+    <button class="primary-btn" bindtap="confirmCrop" loading="{{loading}}" disabled="{{loading}}">
+      {{loading ? '正在裁剪…' : '完成裁剪'}}
+    </button>
+  </view>
+
+  <canvas
+    canvas-id="cropCanvas"
+    class="hidden-canvas"
+    style="width: 720px; height: 720px;"
+  ></canvas>
+</view>

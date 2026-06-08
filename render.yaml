@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: bead-gift-workshop-api
+    runtime: python
+    rootDir: bead-gift-workshop
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.app:app
+    envVars:
+      - key: FLASK_DEBUG
+        value: "0"
