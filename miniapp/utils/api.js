@@ -1,4 +1,4 @@
-const BASE_URL = 'http://10.93.121.68:5050';
+const BASE_URL = 'https://zhibai24.pythonanywhere.com';
 
 function getBaseUrl() {
   return BASE_URL;
