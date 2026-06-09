@@ -233,6 +233,12 @@ def build_pattern_palette(color_stats):
     return palette
 
 
+def get_text_color_for_background(rgb):
+    r, g, b = rgb
+    luminance = 0.299 * r + 0.587 * g + 0.114 * b
+    return (255, 255, 255) if luminance < 145 else (36, 36, 36)
+
+
 def generate_pattern_sheet(grid, palette):
     height = len(grid)
     width = len(grid[0]) if height else 0
@@ -269,14 +275,20 @@ def generate_pattern_sheet(grid, palette):
             y1 = top + row_idx * cell_size
             x2 = x1 + cell_size
             y2 = y1 + cell_size
-            draw.rectangle([x1, y1, x2, y2], fill=(255, 255, 255), outline=(220, 220, 220))
+            fill_rgb = tuple(cell["rgb"])
+            draw.rectangle([x1, y1, x2, y2], fill=fill_rgb, outline=(220, 220, 220))
             text = cell["number"]
             bbox = draw.textbbox((0, 0), text, font=cell_font)
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
             text_x = x1 + (cell_size - text_width) / 2
             text_y = y1 + (cell_size - text_height) / 2 - 1
-            draw.text((text_x, text_y), text, fill=(48, 48, 48), font=cell_font)
+            draw.text(
+                (text_x, text_y),
+                text,
+                fill=get_text_color_for_background(fill_rgb),
+                font=cell_font,
+            )
 
     if width >= 20 and height >= 20:
         for index in range(0, width + 1, 10):
