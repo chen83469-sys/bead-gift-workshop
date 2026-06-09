@@ -12,73 +12,91 @@ const ENTRY_TYPE_CONFIG = {
     defaultMode: 'portrait',
     modeSectionTitle: '选择图稿预设',
     parameterSectionTitle: '图稿参数',
-    fieldTip: '通用生成更适合先快速看效果，后面再决定要不要做成礼物版本。',
+    fieldTip: '先用通用生成快速出稿，再根据效果决定是否继续调整。',
     generateButtonLabel: '生成拼豆图稿',
     modes: [
       { key: 'portrait', label: '标准头像', hint: '适合大多数头像、自拍和纪念照' },
-      { key: 'pet', label: '宠物主体', hint: '保留毛色层次，适合猫狗和毛绒主体' },
-      { key: 'couple', label: '双人合照', hint: '更适合双人框架和并排主体' }
+      { key: 'pet', label: '宠物主体', hint: '更适合猫狗等毛绒主体' },
+      { key: 'couple', label: '双人合照', hint: '更适合并排站位、双人主体清晰的照片' }
     ]
   },
   gift: {
     defaultMode: 'couple',
-    modeSectionTitle: '选择礼物模式',
-    parameterSectionTitle: '礼物参数',
-    fieldTip: '默认参数已经按礼物场景做过收敛，先直接生成即可。',
-    generateButtonLabel: '生成礼物图稿',
+    modeSectionTitle: '选择推荐预设',
+    parameterSectionTitle: '推荐参数',
+    fieldTip: '推荐预设已经做过一轮收敛，适合直接快速出图。',
+    generateButtonLabel: '生成拼豆图稿',
     modes: [
-      { key: 'couple', label: '情侣头像', hint: '更适合纪念日、生日礼物' },
-      { key: 'pet', label: '宠物纪念', hint: '保留毛色层次，成品更有记忆点' },
-      { key: 'portrait', label: '卡通人像', hint: '颜色更轻，适合新手快速完成' }
+      { key: 'couple', label: '双人头像', hint: '更适合纪念照和头像型图稿' },
+      { key: 'pet', label: '宠物纪念', hint: '优先保留宠物毛色层次和面部特征' },
+      { key: 'portrait', label: '卡通人像', hint: '颜色更轻、上手更快' }
     ]
   }
 };
 
+const RESULT_VIEW_TABS = [
+  { key: 'preview', label: '效果图' },
+  { key: 'pattern', label: '制作图纸' }
+];
+
 function withActive(items, activeKey) {
-  return items.map(item => ({
+  return items.map((item) => ({
     ...item,
     active: item.key === activeKey
   }));
 }
 
+function getActiveResultUrl(result, view) {
+  if (!result) return '';
+  if (view === 'pattern') {
+    return result.display_pattern_url || result.pattern_url || '';
+  }
+  return result.display_preview_url || result.preview_url || '';
+}
+
 Page({
   data: {
     entryType: 'universal',
-    entryTypes: withActive([
-      {
-        key: 'universal',
-        label: '通用生成',
-        hint: '先把照片稳定转成拼豆图稿，适合日常练手和快速出稿'
-      },
-      {
-        key: 'gift',
-        label: '礼物推荐',
-        hint: '按送礼场景收敛默认参数，更适合纪念照和头像类作品'
-      }
-    ], 'universal'),
+    entryTypes: withActive(
+      [
+        {
+          key: 'universal',
+          label: '通用生成',
+          hint: '适合把手机里的照片快速转成拼豆图稿'
+        },
+        {
+          key: 'gift',
+          label: '推荐预设',
+          hint: '给你一组更收敛的默认参数，适合直接出稿'
+        }
+      ],
+      'universal'
+    ),
     mode: 'portrait',
     modes: withActive(ENTRY_TYPE_CONFIG.universal.modes, 'portrait'),
     modeSectionTitle: ENTRY_TYPE_CONFIG.universal.modeSectionTitle,
     parameterSectionTitle: ENTRY_TYPE_CONFIG.universal.parameterSectionTitle,
     fieldTip: ENTRY_TYPE_CONFIG.universal.fieldTip,
     generateButtonLabel: ENTRY_TYPE_CONFIG.universal.generateButtonLabel,
-    loadingText: '正在生成图稿…',
+    loadingText: '正在生成图稿...',
     imagePath: '',
     hasImage: false,
     canGenerate: false,
     loading: false,
     result: null,
+    resultView: 'preview',
+    resultViewTabs: RESULT_VIEW_TABS,
     sizeOptions: [
-      { value: 40, label: '40 x 40 · 小巧挂件' },
-      { value: 48, label: '48 x 48 · 送礼常用' },
+      { value: 40, label: '40 x 40 · 小巧快速' },
+      { value: 48, label: '48 x 48 · 平衡常用' },
       { value: 56, label: '56 x 56 · 细节更丰富' },
-      { value: 64, label: '64 x 64 · 更适合大图' },
+      { value: 64, label: '64 x 64 · 适合更大图稿' },
       { value: 'custom', label: '自定义尺寸' }
     ],
     colorOptions: [
       { value: 10, label: '10 色 · 更省豆' },
       { value: 12, label: '12 色 · 新手友好' },
-      { value: 14, label: '14 色 · 礼物常用' },
+      { value: 14, label: '14 色 · 平衡常用' },
       { value: 16, label: '16 色 · 细节更好' },
       { value: 20, label: '20 色 · 层次更丰富' },
       { value: 24, label: '24 色 · 适合细节图' },
@@ -99,21 +117,20 @@ Page({
 
   onShow() {
     const payload = app.globalData.croppedImagePayload;
-    if (!payload || !payload.path) {
-      return;
-    }
+    if (!payload || !payload.path) return;
+
     app.globalData.croppedImagePayload = null;
     this.setData({
       imagePath: payload.path,
       hasImage: true,
       canGenerate: true,
-      result: null
+      result: null,
+      resultView: 'preview'
     });
   },
 
   chooseEntryType(e) {
-    const entryType = e.currentTarget.dataset.entryType;
-    this.applyEntryType(entryType);
+    this.applyEntryType(e.currentTarget.dataset.entryType);
   },
 
   applyEntryType(entryType) {
@@ -127,7 +144,8 @@ Page({
       parameterSectionTitle: config.parameterSectionTitle,
       fieldTip: config.fieldTip,
       generateButtonLabel: config.generateButtonLabel,
-      result: null
+      result: null,
+      resultView: 'preview'
     });
     this.applyPreset(config.defaultMode);
   },
@@ -144,8 +162,8 @@ Page({
 
   applyPreset(mode) {
     const preset = MODE_PRESETS[mode];
-    const sizeIndex = this.data.sizeOptions.findIndex(item => item.value === preset.size);
-    const colorIndex = this.data.colorOptions.findIndex(item => item.value === preset.colorCount);
+    const sizeIndex = this.data.sizeOptions.findIndex((item) => item.value === preset.size);
+    const colorIndex = this.data.colorOptions.findIndex((item) => item.value === preset.colorCount);
     this.setData({
       sizeIndex: sizeIndex >= 0 ? sizeIndex : 0,
       colorIndex: colorIndex >= 0 ? colorIndex : 0,
@@ -193,7 +211,6 @@ Page({
   resolveGenerateParams() {
     const sizeChoice = this.data.sizeOptions[this.data.sizeIndex].value;
     const colorChoice = this.data.colorOptions[this.data.colorIndex].value;
-
     const parsedSize =
       sizeChoice === 'custom' ? parseInt(this.data.customSize, 10) : Number(sizeChoice);
     const parsedColorCount =
@@ -242,16 +259,18 @@ Page({
 
   generate() {
     if (!this.data.imagePath) {
-      wx.showToast({ title: '先选一张照片', icon: 'none' });
+      wx.showToast({ title: '请先选择一张图片', icon: 'none' });
       return;
     }
+
     const params = this.resolveGenerateParams();
-    if (!params) {
-      return;
-    }
-    this.setData({ loading: true, result: null });
-    const size = params.size;
-    const colorCount = params.colorCount;
+    if (!params) return;
+
+    this.setData({
+      loading: true,
+      result: null,
+      resultView: 'preview'
+    });
 
     wx.uploadFile({
       url: `${BASE_URL}/api/generate`,
@@ -259,8 +278,8 @@ Page({
       name: 'image',
       formData: {
         mode: this.data.mode,
-        size: String(size),
-        max_colors: String(colorCount)
+        size: String(params.size),
+        max_colors: String(params.colorCount)
       },
       success: (res) => {
         try {
@@ -269,24 +288,29 @@ Page({
             wx.showToast({ title: data.error, icon: 'none' });
             return;
           }
-          const currentMode = this.data.modes.find(item => item.key === this.data.mode);
+
+          const currentMode = this.data.modes.find((item) => item.key === this.data.mode);
           const nextResult = {
             ...data,
             display_mode_label: currentMode ? currentMode.label : data.mode_label,
             display_size_text: `${data.size} x ${data.size}`,
             display_preview_url: data.preview_url,
-            preview_temp_file_path: ''
+            display_pattern_url: data.pattern_url,
+            preview_temp_file_path: '',
+            pattern_temp_file_path: '',
+            current_display_url: data.preview_url
           };
 
           this.setData({ result: nextResult });
-          this.cachePreviewForDisplay(data.preview_url);
+          this.cacheResultImage(data.preview_url, 'preview');
+          this.cacheResultImage(data.pattern_url, 'pattern');
         } catch (err) {
           wx.showToast({ title: '结果解析失败', icon: 'none' });
         }
       },
       fail: () => {
         wx.showToast({
-          title: '生成失败，请确认本地服务已启动',
+          title: '生成失败，请确认后端服务可访问',
           icon: 'none',
           duration: 2500
         });
@@ -297,96 +321,101 @@ Page({
     });
   },
 
-  cachePreviewForDisplay(previewUrl) {
-    if (!previewUrl) return;
+  cacheResultImage(url, viewType) {
+    if (!url) return;
 
     wx.downloadFile({
-      url: previewUrl,
+      url,
       success: (res) => {
-        if (res.statusCode !== 200 || !res.tempFilePath) {
-          return;
+        if (res.statusCode !== 200 || !res.tempFilePath) return;
+
+        const nextData = {};
+        if (viewType === 'preview') {
+          nextData['result.display_preview_url'] = res.tempFilePath;
+          nextData['result.preview_temp_file_path'] = res.tempFilePath;
+        } else {
+          nextData['result.display_pattern_url'] = res.tempFilePath;
+          nextData['result.pattern_temp_file_path'] = res.tempFilePath;
         }
-        this.setData({
-          'result.display_preview_url': res.tempFilePath,
-          'result.preview_temp_file_path': res.tempFilePath
-        });
+
+        if (this.data.resultView === viewType) {
+          nextData['result.current_display_url'] = res.tempFilePath;
+        }
+        this.setData(nextData);
       }
     });
   },
 
-  savePreview() {
-    const { result } = this.data;
-    if (!result || (!result.preview_url && !result.preview_temp_file_path)) {
+  switchResultView(e) {
+    const view = e.currentTarget.dataset.view;
+    if (!this.data.result) return;
+
+    this.setData({
+      resultView: view,
+      'result.current_display_url': getActiveResultUrl(this.data.result, view)
+    });
+  },
+
+  saveCurrentResult() {
+    const { result, resultView } = this.data;
+    if (!result) {
       wx.showToast({ title: '还没有可保存的图稿', icon: 'none' });
       return;
     }
 
-    if (result.preview_temp_file_path) {
-      wx.saveImageToPhotosAlbum({
-        filePath: result.preview_temp_file_path,
-        success: () => {
-          wx.showToast({ title: '已保存到相册', icon: 'success' });
-        },
-        fail: (err) => {
-          if (
-            err &&
-            err.errMsg &&
-            (err.errMsg.includes('auth deny') || err.errMsg.includes('authorize'))
-          ) {
-            wx.showModal({
-              title: '需要相册权限',
-              content: '请允许保存到相册权限，之后就可以把图稿直接存下来。',
-              confirmText: '去设置',
-              success: (modalRes) => {
-                if (modalRes.confirm) {
-                  wx.openSetting({});
-                }
-              }
-            });
-            return;
-          }
-          wx.showToast({ title: '保存失败，请稍后再试', icon: 'none' });
-        }
-      });
+    const tempPath =
+      resultView === 'pattern' ? result.pattern_temp_file_path : result.preview_temp_file_path;
+    const remoteUrl = resultView === 'pattern' ? result.pattern_url : result.preview_url;
+
+    if (!tempPath && !remoteUrl) {
+      wx.showToast({ title: '还没有可保存的图稿', icon: 'none' });
+      return;
+    }
+
+    if (tempPath) {
+      this.saveImageToAlbum(tempPath);
       return;
     }
 
     wx.showLoading({ title: '正在保存' });
     wx.getImageInfo({
-      src: result.preview_url,
+      src: remoteUrl,
       success: (info) => {
-        wx.saveImageToPhotosAlbum({
-          filePath: info.path,
-          success: () => {
-            wx.hideLoading();
-            wx.showToast({ title: '已保存到相册', icon: 'success' });
-          },
-          fail: (err) => {
-            wx.hideLoading();
-            if (
-              err &&
-              err.errMsg &&
-              (err.errMsg.includes('auth deny') || err.errMsg.includes('authorize'))
-            ) {
-              wx.showModal({
-                title: '需要相册权限',
-                content: '请允许保存到相册权限，之后就可以把图稿直接存下来。',
-                confirmText: '去设置',
-                success: (modalRes) => {
-                  if (modalRes.confirm) {
-                    wx.openSetting({});
-                  }
-                }
-              });
-              return;
-            }
-            wx.showToast({ title: '保存失败，请稍后再试', icon: 'none' });
-          }
-        });
+        wx.hideLoading();
+        this.saveImageToAlbum(info.path);
       },
       fail: () => {
         wx.hideLoading();
         wx.showToast({ title: '图稿获取失败', icon: 'none' });
+      }
+    });
+  },
+
+  saveImageToAlbum(filePath) {
+    wx.saveImageToPhotosAlbum({
+      filePath,
+      success: () => {
+        wx.showToast({ title: '已保存到相册', icon: 'success' });
+      },
+      fail: (err) => {
+        if (
+          err &&
+          err.errMsg &&
+          (err.errMsg.includes('auth deny') || err.errMsg.includes('authorize'))
+        ) {
+          wx.showModal({
+            title: '需要相册权限',
+            content: '请允许保存到相册，之后就可以把图稿直接保存下来。',
+            confirmText: '去设置',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                wx.openSetting({});
+              }
+            }
+          });
+          return;
+        }
+        wx.showToast({ title: '保存失败，请稍后再试', icon: 'none' });
       }
     });
   }

@@ -1,5 +1,6 @@
 .page {
   padding: 24rpx 24rpx 48rpx;
+  background: #f8f5f4;
 }
 
 .card {
@@ -35,62 +36,39 @@
   color: #3d2727;
 }
 
-.entry-type-row {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.entry-type-pill {
-  border: 2rpx solid #efdede;
-  border-radius: 20rpx;
-  padding: 20rpx;
-  background: #fffdfc;
-}
-
-.entry-type-pill.active {
-  border-color: #ff8a73;
-  background: #fff5f1;
-}
-
-.entry-type-name {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #3d2727;
-}
-
-.entry-type-hint {
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  line-height: 1.6;
-  color: #816767;
-}
-
+.entry-type-row,
 .mode-row {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
 }
 
+.entry-type-pill,
 .mode-pill {
-  border: 2rpx solid #f1dddd;
+  border: 2rpx solid #efdede;
   border-radius: 20rpx;
   padding: 20rpx;
+  background: #fffdfc;
 }
 
+.entry-type-pill.active,
 .mode-pill.active {
-  border-color: #ff7f7d;
-  background: #fff5f4;
+  border-color: #ff8a73;
+  background: #fff5f1;
 }
 
+.entry-type-name,
 .mode-name {
   font-size: 28rpx;
-  font-weight: 600;
+  font-weight: 700;
+  color: #3d2727;
 }
 
+.entry-type-hint,
 .mode-hint {
   margin-top: 8rpx;
   font-size: 24rpx;
+  line-height: 1.6;
   color: #816767;
 }
 
@@ -184,6 +162,28 @@
   border: 2rpx solid #f0dddd;
 }
 
+.result-tab-row {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.result-tab {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  border-radius: 999rpx;
+  background: #f7efed;
+  color: #8b6f6f;
+  font-size: 26rpx;
+}
+
+.result-tab.active {
+  background: #ff7f73;
+  color: #ffffff;
+  font-weight: 700;
+}
+
 .result-preview {
   width: 100%;
   border-radius: 16rpx;
@@ -228,6 +228,13 @@
   border-bottom: none;
 }
 
+.legend-number {
+  width: 64rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #564343;
+}
+
 .color-chip {
   width: 42rpx;
   height: 42rpx;
@@ -238,9 +245,10 @@
 
 .color-info {
   display: flex;
-  width: 100%;
+  flex: 1;
   justify-content: space-between;
   align-items: center;
+  gap: 20rpx;
 }
 
 .color-code {

@@ -1,7 +1,9 @@
 <view class="page">
   <view class="hero card">
-    <view class="hero-title">把照片快速变成一张能真正照着做的拼豆图稿</view>
-    <view class="hero-desc">你可以先用通用生成快速出稿，也可以切到礼物推荐，做更适合送人的纪念作品。</view>
+    <view class="hero-title">把照片变成一张能真正照着做的拼豆图稿</view>
+    <view class="hero-desc">
+      先选照片、裁剪主体，再生成效果图和制作图纸。现在不只是能看，还能真正拿去拼。
+    </view>
   </view>
 
   <view class="card">
@@ -37,7 +39,7 @@
     <view wx:if="{{!hasImage}}" class="upload-box" bindtap="pickImage">
       <view class="upload-icon">+</view>
       <view class="upload-title">选择一张照片</view>
-      <view class="upload-desc">建议使用头像、宠物正脸或对比清晰的纪念照</view>
+      <view class="upload-desc">建议选择主体清晰、背景干净、方便裁剪的照片</view>
     </view>
     <view wx:else class="preview-box">
       <image class="origin-preview" src="{{imagePath}}" mode="aspectFill"></image>
@@ -63,6 +65,7 @@
         placeholder="请输入 24~96 之间的整数"
       />
     </view>
+
     <view class="field">
       <view class="field-label">颜色数量</view>
       <picker mode="selector" range="{{colorOptions}}" range-key="label" bindchange="changeColorCount">
@@ -77,6 +80,7 @@
         placeholder="请输入 6~48 之间的整数"
       />
     </view>
+
     <view class="field-tip">{{fieldTip}}</view>
   </view>
 
@@ -88,22 +92,46 @@
   <view wx:if="{{result}}" class="result">
     <view class="card">
       <view class="section-title">生成结果</view>
-      <image class="result-preview" src="{{result.display_preview_url}}" mode="widthFix"></image>
+
+      <view class="result-tab-row">
+        <block wx:for="{{resultViewTabs}}" wx:key="key">
+          <view
+            class="result-tab {{resultView === item.key ? 'active' : ''}}"
+            data-view="{{item.key}}"
+            bindtap="switchResultView"
+          >
+            {{item.label}}
+          </view>
+        </block>
+      </view>
+
+      <image class="result-preview" src="{{result.current_display_url}}" mode="widthFix"></image>
+
       <view class="result-meta">
         <view class="meta-item">模式：{{result.display_mode_label}}</view>
         <view class="meta-item">尺寸：{{result.display_size_text}}</view>
-        <view class="meta-item">预计豆子：{{result.total_beads}}</view>
+        <view class="meta-item">预计豆数：{{result.total_beads}}</view>
       </view>
-      <view class="gift-copy">{{result.gift_copy}}</view>
+
+      <view class="gift-copy">
+        <block wx:if="{{resultView === 'pattern'}}">
+          当前是制作图纸视图：每个格子的编号都可以在下方图例中找到对应颜色。
+        </block>
+        <block wx:else>{{result.gift_copy}}</block>
+      </view>
+
       <view class="result-actions">
-        <button class="light-btn result-action-btn" bindtap="savePreview">保存图稿到相册</button>
+        <button class="light-btn result-action-btn" bindtap="saveCurrentResult">
+          保存当前图稿到相册
+        </button>
       </view>
     </view>
 
     <view class="card">
-      <view class="section-title">颜色清单</view>
-      <block wx:for="{{result.color_stats}}" wx:key="code">
+      <view class="section-title">颜色图例</view>
+      <block wx:for="{{result.pattern_legend}}" wx:key="code">
         <view class="color-row">
+          <view class="legend-number">{{item.number}}</view>
           <view class="color-chip" style="background: rgb({{item.rgb[0]}}, {{item.rgb[1]}}, {{item.rgb[2]}});"></view>
           <view class="color-info">
             <view class="color-code">{{item.code}} · {{item.name}}</view>
